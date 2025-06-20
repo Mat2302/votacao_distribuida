@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.SwingUtilities;
+
 import shared.NetProtocol;
 import shared.VoteOption;
 import shared.VotingInfoPayload;
@@ -23,7 +25,25 @@ public class Server {
 
             ServerController controller = new ServerController(votes);
             VotingInfoPayload votingPayload = setupVotation();
-            controller.start(votingPayload);
+
+            String[] chartLabels = votingPayload.getOptions()
+                    .stream()
+                    .map(option -> option.getDescription())
+                    .toArray(String[]::new);
+
+            int[] chartValues = votingPayload.getOptions()
+                    .stream()
+                    .mapToInt(option -> 0)
+                    .toArray();
+
+            BarChartWindow[] holder = new BarChartWindow[1];
+            SwingUtilities.invokeAndWait(() -> {
+                holder[0] = new BarChartWindow(chartValues, chartLabels, votingPayload.getTitle(), votingPayload.getDescription(), votingPayload.getQuestion());
+            });
+
+            BarChartWindow chart = holder[0];
+
+            controller.start(votingPayload, chart);
             System.out.println("Server is shutting down now.");
 
             // TODO: gerar relatórios
@@ -68,7 +88,7 @@ class ServerController {
         this.votes = votes;
     }
 
-    void start(VotingInfoPayload votingPayload) {
+    void start(VotingInfoPayload votingPayload, BarChartWindow chart) {
         try (ServerSocket serverSocket = new ServerSocket(NetProtocol.port)) {
             System.out.println("Server listening on port " + NetProtocol.port);
 
@@ -77,7 +97,7 @@ class ServerController {
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("Accepted connection from " + clientSocket.getRemoteSocketAddress());
 
-                    clientPool.submit(new ClientHandler(clientSocket, votingPayload, votes));
+                    clientPool.submit(new ClientHandler(clientSocket, votingPayload, votes, chart));
                 } catch (IOException ioe) {
                     if (running)
                         System.err.println("Error accepting client connection: " + ioe.getMessage());

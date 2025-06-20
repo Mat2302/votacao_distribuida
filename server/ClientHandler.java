@@ -17,11 +17,13 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private final VotingInfoPayload votingInfoPayload;
     private final HashMap<String, Integer> votes;
+    private final BarChartWindow chart;
 
-    ClientHandler(Socket socket, VotingInfoPayload votingInfoPayload, HashMap<String, Integer> votes) {
+    ClientHandler(Socket socket, VotingInfoPayload votingInfoPayload, HashMap<String, Integer> votes, BarChartWindow chart) {
         this.socket = socket;
         this.votingInfoPayload = votingInfoPayload;
         this.votes = votes;
+        this.chart = chart;
     }
 
     @Override
@@ -79,6 +81,22 @@ public class ClientHandler implements Runnable {
                 }
 
                 votes.put(payload.getVoter().getCPF(), payload.getVoteOptionID());
+                
+                // Atualiza o gráfico a cada nova requisição
+                String label = votingInfoPayload.getOptions()
+                    .stream()
+                    .filter(o -> o.getId() == payload.getVoteOptionID())
+                    .findFirst()
+                    .get()
+                    .getDescription();
+                
+                long count = votes.values()
+                      .stream()
+                      .filter(v -> v == payload.getVoteOptionID())
+                      .count();
+                
+                chart.updateValue(label, (int) count);
+                
                 System.out.println("Vote registered for " + payload.getVoter().getCPF() + " closing connection.");
                 oos.writeObject(new NetControl(NetCommand.Shutdown));
                 oos.flush();
