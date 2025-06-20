@@ -6,6 +6,8 @@ import java.net.Socket;
 
 import shared.NetCommand;
 import shared.NetControl;
+import shared.VotePayload;
+import shared.Voter;
 
 public class TestClient {
 
@@ -29,6 +31,12 @@ public class TestClient {
                     if (nc.getNetCommand() == NetCommand.SendVotingInfo) {
                         System.out.println("Voting payload recebido:");
                         System.out.println(nc.getPayload());
+
+
+
+                        // send vote
+                        oos.writeObject(new NetControl(NetCommand.SendVote, new VotePayload(null, 0, new Voter("hitallo", "42037192835"), 1)));
+                        oos.flush();
                     }
 
                     if (nc.getNetCommand() == NetCommand.Shutdown) {

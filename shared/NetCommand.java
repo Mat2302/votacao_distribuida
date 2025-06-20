@@ -5,6 +5,8 @@ package shared;
 public enum NetCommand {
    Acknowledge("Acknowledge Command"),
    Shutdown("Shutdown Command"),
+   SendVote("Send Vote Command"),
+   VoteReceived("Confirm Vote Receive Command"),
    SendVotingInfo("Send Voting Info Command");
 
    private final String description;

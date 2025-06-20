@@ -10,7 +10,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import shared.NetProtocol;
-import shared.VotingPayload;
+import shared.VoteOption;
+import shared.VotingInfoPayload;
 
 /**
  * Multi-threaded server: accepts multiple client connections and serves each
@@ -53,18 +54,21 @@ class ServerController {
         String description = scanner.nextLine();
         System.out.println("Qual é a pergunta da votação?");
         String question = scanner.nextLine();
-        ArrayList<String> options = new ArrayList<>();
+        ArrayList<VoteOption> options = new ArrayList<>();
         String option;
         System.out.println("Informe as opções de voto do usuário:");
         do {
             option = scanner.nextLine();
             if (option.length() > 0){
-                options.add(option);
+                int id = options.size();
+                options.add(new VoteOption(id, option));
             }
         } while (option.length() != 0);
         scanner.close();
 
-        VotingPayload votingPayload = new VotingPayload("Pacote com os dados de votação.", 0, question, options, title, description);
+        VotingInfoPayload votingPayload = new VotingInfoPayload("Pacote com os dados de votação.", 0, question, options, title, description);
+
+        System.out.println(votingPayload);
 
         // Create ServerSocket and enter accept loop
         try (ServerSocket serverSocket = new ServerSocket(NetProtocol.port)) {

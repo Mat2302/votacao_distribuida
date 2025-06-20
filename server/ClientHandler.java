@@ -6,7 +6,7 @@ import java.net.Socket;
 
 import shared.NetCommand;
 import shared.NetControl;
-import shared.VotingPayload;
+import shared.VotingInfoPayload;
 
 /**
  * Handles interaction with a single connected client.
@@ -15,12 +15,12 @@ import shared.VotingPayload;
 public class ClientHandler implements Runnable
 {
     private final Socket socket;
-    private final VotingPayload votingPayload;
+    private final VotingInfoPayload VotingInfoPayload;
 
-    ClientHandler(Socket socket, VotingPayload votingPayload)
+    ClientHandler(Socket socket, VotingInfoPayload VotingInfoPayload)
     {
         this.socket = socket;
-        this.votingPayload = votingPayload;
+        this.VotingInfoPayload = VotingInfoPayload;
     }
 
     @Override
@@ -30,12 +30,31 @@ public class ClientHandler implements Runnable
         try (Socket s = socket;
              ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
              ObjectInputStream  ois = new ObjectInputStream(s.getInputStream()))
-        {
+             {
+                 
+            System.out.println("sending voting info...");
+            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, VotingInfoPayload));
+            oos.flush();
+            
+            while (true){
+                Object obj = ois.readObject();
+
+                if (obj instanceof NetControl nc) {
+                    System.out.println("Received NetControl: " + nc.getNetCommand());
+
+                    if (nc.getNetCommand() == NetCommand.SendVote) {
+                        System.out.println("voto recebido");
+                        System.out.println(nc.getPayload());
+                    }
+
+                    if (nc.getNetCommand() == NetCommand.Shutdown) {
+                        System.out.println("Servidor pediu shutdown. Encerrando cliente.");
+                        break;
+                    }
+                }
+            }
             System.out.println("ClientHandler started for " + s.getRemoteSocketAddress());
 
-            System.out.println("sending voting info...");
-            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, votingPayload));
-            oos.flush();
 
             // receber voto
             // registrar voto, sobrescrever ou ignorar
@@ -49,10 +68,10 @@ public class ClientHandler implements Runnable
         {
             System.err.println("I/O error with client " + socket.getRemoteSocketAddress() + ": " + ioe.getMessage());
         }
-        // catch (ClassNotFoundException cnfe)
-        // {
-        //     System.err.println("Class not found during deserialization for client " + socket.getRemoteSocketAddress() + ": " + cnfe.getMessage());
-        // }
+        catch (ClassNotFoundException cnfe)
+        {
+            System.err.println("Class not found during deserialization for client " + socket.getRemoteSocketAddress() + ": " + cnfe.getMessage());
+        }
         finally
         {
             System.out.println("ClientHandler finished for " + socket.getRemoteSocketAddress());
