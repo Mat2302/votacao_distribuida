@@ -1,79 +1,95 @@
 package server;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.HashMap;
 
+import client.CPFValidator;
 import shared.NetCommand;
 import shared.NetControl;
+import shared.VoteOption;
+import shared.VotePayload;
 import shared.VotingInfoPayload;
 
-/**
- * Handles interaction with a single connected client.
- * Each instance runs on the thread pool.
- */
-public class ClientHandler implements Runnable
-{
+public class ClientHandler implements Runnable {
     private final Socket socket;
-    private final VotingInfoPayload VotingInfoPayload;
+    private final VotingInfoPayload votingInfoPayload;
+    private final HashMap<String, Integer> votes;
 
-    ClientHandler(Socket socket, VotingInfoPayload VotingInfoPayload)
-    {
+    ClientHandler(Socket socket, VotingInfoPayload votingInfoPayload, HashMap<String, Integer> votes) {
         this.socket = socket;
-        this.VotingInfoPayload = VotingInfoPayload;
+        this.votingInfoPayload = votingInfoPayload;
+        this.votes = votes;
     }
 
     @Override
-    public void run()
-    {
-        // Important: create ObjectOutputStream BEFORE ObjectInputStream to avoid deadlock
-        try (Socket s = socket;
-             ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
-             ObjectInputStream  ois = new ObjectInputStream(s.getInputStream()))
-             {
-                 
-            System.out.println("sending voting info...");
-            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, VotingInfoPayload));
+    public void run() {
+        try (
+            Socket s = socket;
+            ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+            ObjectInputStream ois = new ObjectInputStream(s.getInputStream())
+        ) {
+
+            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, votingInfoPayload));
             oos.flush();
-            
-            while (true){
-                Object obj = ois.readObject();
+            System.out.println("[+] Vote information sent.");
 
-                if (obj instanceof NetControl nc) {
-                    System.out.println("Received NetControl: " + nc.getNetCommand());
+            Object obj = ois.readObject();
 
-                    if (nc.getNetCommand() == NetCommand.SendVote) {
-                        System.out.println("voto recebido");
-                        System.out.println(nc.getPayload());
-                    }
+            if (!(obj instanceof NetControl)) {
+                oos.writeObject(new NetControl(NetCommand.NotKnownProtocol));
+                oos.flush();
+                return;
+            }
 
-                    if (nc.getNetCommand() == NetCommand.Shutdown) {
-                        System.out.println("Servidor pediu shutdown. Encerrando cliente.");
-                        break;
+            NetControl nc = (NetControl) obj;
+            System.out.println("[+] Received net control: " + nc.getNetCommand());
+
+            if (nc.getNetCommand() == NetCommand.SendVote) {
+                /*
+                 * Recebe o payload do voto
+                 * Verifica se é um cpf válido
+                 * Verifica se é uma opção válida
+                 * Registra o voto
+                 * Encerra a conexão
+                 */
+                VotePayload payload = (VotePayload) nc.getPayload();
+
+                if (!CPFValidator.validate(payload.getVoter().getCPF())) {
+                    oos.writeObject(new NetControl(NetCommand.InvalidCPF));
+                    oos.flush();
+                    System.out.println("[+] Invalid CPF. Response sent.");
+                    return;
+                }
+
+                boolean exists = false;
+                for (VoteOption option : this.votingInfoPayload.getOptions()) {
+                    if (option.getId() == payload.getVoteOptionID()) {
+                        exists = true;
                     }
                 }
+
+                if (!exists) {
+                    oos.writeObject(new NetControl(NetCommand.InvalidOption));
+                    oos.flush();
+                    System.out.println("[+] Invalid option received. Response sent.");
+                    return;
+                }
+
+                votes.put(payload.getVoter().getCPF(), payload.getVoteOptionID());
+                System.out.println("Vote registered for " + payload.getVoter().getCPF() + " closing connection.");
+                oos.writeObject(new NetControl(NetCommand.Shutdown));
+                oos.flush();
+                return;
             }
-            System.out.println("ClientHandler started for " + s.getRemoteSocketAddress());
 
-
-            // receber voto
-            // registrar voto, sobrescrever ou ignorar
-
-            // desconectar
-            System.out.println("Asking for graceful shutdown of the client " + s.getRemoteSocketAddress());
-            oos.writeObject(new NetControl(NetCommand.Shutdown));
-            oos.flush();
-        }
-        catch (IOException ioe)
-        {
+        } catch (IOException ioe) {
             System.err.println("I/O error with client " + socket.getRemoteSocketAddress() + ": " + ioe.getMessage());
-        }
-        catch (ClassNotFoundException cnfe)
-        {
+        } catch (ClassNotFoundException cnfe) {
             System.err.println("Class not found during deserialization for client " + socket.getRemoteSocketAddress() + ": " + cnfe.getMessage());
-        }
-        finally
-        {
+        } finally {
             System.out.println("ClientHandler finished for " + socket.getRemoteSocketAddress());
         }
     }

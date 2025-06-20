@@ -6,6 +6,9 @@ public enum NetCommand {
    Acknowledge("Acknowledge Command"),
    Shutdown("Shutdown Command"),
    SendVote("Send Vote Command"),
+   NotKnownProtocol("NotKnownProtocol Command"),
+   InvalidCPF("Invalid CPF Command"),
+   InvalidOption("Invalid Option Command"),
    VoteReceived("Confirm Vote Receive Command"),
    SendVotingInfo("Send Voting Info Command");
 
