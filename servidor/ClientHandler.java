@@ -5,6 +5,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -40,6 +42,15 @@ public class ClientHandler implements Runnable
             // enviar payload de votação
             // receber votação
 
+            List<Candidate> candidates = new ArrayList<>();
+            candidates.add(new Candidate(0, "hitallo"));
+            candidates.add(new Candidate(1, "joao prefeito"));
+
+            VotingPayload votingInfo = new VotingPayload("qual candidato é o melhor?", candidates);
+
+            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, votingInfo));
+            oos.flush();
+
             System.out.println("Asking for graceful shutdown of the client " + s.getRemoteSocketAddress());
             oos.writeObject(new NetControl(NetCommand.Shutdown));
             oos.flush();
@@ -48,10 +59,10 @@ public class ClientHandler implements Runnable
         {
             System.err.println("I/O error with client " + socket.getRemoteSocketAddress() + ": " + ioe.getMessage());
         }
-        catch (ClassNotFoundException cnfe)
-        {
-            System.err.println("Class not found during deserialization for client " + socket.getRemoteSocketAddress() + ": " + cnfe.getMessage());
-        }
+        // catch (ClassNotFoundException cnfe)
+        // {
+        //     System.err.println("Class not found during deserialization for client " + socket.getRemoteSocketAddress() + ": " + cnfe.getMessage());
+        // }
         finally
         {
             System.out.println("ClientHandler finished for " + socket.getRemoteSocketAddress());

@@ -1,6 +1,6 @@
 package servidor;
 
-public class Candidate {
+public class Candidate extends Serializable {
     private int id;
     private String name;
 
@@ -11,4 +11,6 @@ public class Candidate {
 
     public String getName(){ return this.name; }
     public int getId(){ return this.id; }
+    @Override
+    public String toString(){ return id + " - " + name; }
 }

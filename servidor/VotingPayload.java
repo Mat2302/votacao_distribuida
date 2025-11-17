@@ -4,6 +4,7 @@ import java.util.List;
 
 public class VotingPayload {
 
+    private static final long serialVersionUID = 1L;
     private String question;
     private List<Candidate> candidates;
 
