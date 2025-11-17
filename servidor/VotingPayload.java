@@ -1,16 +1,18 @@
 package servidor;
 
+import java.util.List;
+
 public class VotingPayload {
 
     private String question;
-    private Candidate[] candidates;
+    private List<Candidate> candidates;
 
-    VotingPayload(String question, Candidate[] candidates){
+    VotingPayload(String question, List<Candidate> candidates){
         this.question = question;
         this.candidates = candidates;
     }
 
     public String getQuestion(){ return this.question; }
-    public Candidate[] getCandidates(){ return this.candidates; };
+    public List<Candidate> getCandidates(){ return this.candidates; };
 
 }
