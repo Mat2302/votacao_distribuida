@@ -1,9 +1,5 @@
 package shared;
 
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 // Look for a Payload class that extends NetProtocol in another file
 // That class is a Data Transfer Object with all needed user information
 // Not here for clarity
