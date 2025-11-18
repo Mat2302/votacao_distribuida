@@ -17,14 +17,11 @@ public class ClientHandler implements Runnable
 {
     private final Socket socket;
     private final VotingPayload votingPayload;
-    private final Random randGen;
 
     ClientHandler(Socket socket, VotingPayload votingPayload)
     {
         this.socket = socket;
         this.votingPayload = votingPayload;
-        // Use a separate Random per handler to reduce contention
-        this.randGen = new Random(System.nanoTime() ^ socket.hashCode());
     }
 
     @Override
