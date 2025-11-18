@@ -41,16 +41,10 @@ public class ClientHandler implements Runnable
             oos.writeObject(new NetControl(NetCommand.SendVotingInfo, votingPayload));
             oos.flush();
 
-            // receber cpf
-            // validar cpf
+            // receber voto
+            // registrar voto, sobrescrever ou ignorar
 
-            // se validado e não existir voto:
-            // enviar payload de votação
-            // receber votação
-
-            // VotingPayload votingInfo = new VotingPayload("qual candidato é o melhor?", candidates);
-
-
+            // desconectar
             System.out.println("Asking for graceful shutdown of the client " + s.getRemoteSocketAddress());
             oos.writeObject(new NetControl(NetCommand.Shutdown));
             oos.flush();
