@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import shared.NetCommand;
+import shared.NetControl;
+import shared.VotingPayload;
+
 /**
  * Handles interaction with a single connected client.
  * Each instance runs on the thread pool.
@@ -16,11 +20,13 @@ import java.util.Random;
 public class ClientHandler implements Runnable
 {
     private final Socket socket;
+    private final VotingPayload votingPayload;
     private final Random randGen;
 
-    ClientHandler(Socket socket)
+    ClientHandler(Socket socket, VotingPayload votingPayload)
     {
         this.socket = socket;
+        this.votingPayload = votingPayload;
         // Use a separate Random per handler to reduce contention
         this.randGen = new Random(System.nanoTime() ^ socket.hashCode());
     }
@@ -35,6 +41,10 @@ public class ClientHandler implements Runnable
         {
             System.out.println("ClientHandler started for " + s.getRemoteSocketAddress());
 
+            System.out.println("sending voting info...");
+            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, votingPayload));
+            oos.flush();
+
             // receber cpf
             // validar cpf
 
@@ -42,14 +52,8 @@ public class ClientHandler implements Runnable
             // enviar payload de votação
             // receber votação
 
-            List<Candidate> candidates = new ArrayList<>();
-            candidates.add(new Candidate(0, "hitallo"));
-            candidates.add(new Candidate(1, "joao prefeito"));
+            // VotingPayload votingInfo = new VotingPayload("qual candidato é o melhor?", candidates);
 
-            VotingPayload votingInfo = new VotingPayload("qual candidato é o melhor?", candidates);
-
-            oos.writeObject(new NetControl(NetCommand.SendVotingInfo, votingInfo));
-            oos.flush();
 
             System.out.println("Asking for graceful shutdown of the client " + s.getRemoteSocketAddress());
             oos.writeObject(new NetControl(NetCommand.Shutdown));

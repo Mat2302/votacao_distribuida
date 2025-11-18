@@ -4,10 +4,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import shared.NetCommand;
+import shared.NetControl;
+
 public class TestClient {
 
     public static void main(String[] args) {
-        try (Socket socket = new Socket("localhost", 5000)) {
+        try (Socket socket = new Socket("localhost", 1234)) {
 
             System.out.println("Connected to server!");
 
