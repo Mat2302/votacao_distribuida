@@ -57,12 +57,11 @@ public class CpfPage extends JFrame {
             // Depois tem que remover esse errorLabel e direcionar para a página de votação
             // new VotePage(cpf).setVisible(true);
             // dispose();
-            System.out.println("antes try");
             try {
-                System.out.println("dentro try");
-                VoteClient vc = new VoteClient();
-                vc.listenAsync();
-                System.out.println(vc.getVotingInfo());
+                VoteClient voteCliente = new VoteClient();
+                voteCliente.listenAsync();
+
+                // passar o voteCliente como parâmetro para a tela de visualização.
             } catch (Exception e) {
             }
         } else {
