@@ -8,7 +8,7 @@ public class BarChartWindow extends JFrame {
 
     private final BarChartPanel panel;
 
-    public BarChartWindow(int[] values, String[] labels, String title, String description, String question) {
+    public BarChartWindow(int[] values, String[] labels, String title, String description, String question, Runnable onCloseCallback) {
         super("Votação: " + title);
 
         if (values.length != labels.length) {
@@ -21,6 +21,27 @@ public class BarChartWindow extends JFrame {
 
         panel = new BarChartPanel(values, labels, description, question);
         add(panel);
+
+                JButton endButton = new JButton("Encerrar votação");
+        endButton.setFocusable(false);
+
+        endButton.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Deseja realmente encerrar a votação?",
+                "Confirmar encerramento",
+                JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                onCloseCallback.run();
+            }
+        });
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(endButton);
+
+        add(bottomPanel, BorderLayout.SOUTH);
 
         setVisible(true);
     }
