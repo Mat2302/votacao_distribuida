@@ -1,3 +1,4 @@
+package client;
 import client.view.MainPage;
 import javax.swing.SwingUtilities;
 
