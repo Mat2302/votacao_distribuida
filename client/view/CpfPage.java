@@ -4,10 +4,12 @@ import shared.CPFValidator;
 import java.awt.*;
 import javax.swing.*;
 
+import client.VoteClient;
+
 public class CpfPage extends JFrame {
     private final JTextField cpfField;
     private final JLabel errorLabel;
-    
+
     public CpfPage() {
         setTitle("Identificação do Eleitor");
         setSize(350, 200);
@@ -49,12 +51,20 @@ public class CpfPage extends JFrame {
         if (cpf.isEmpty()) {
             errorLabel.setText("Digite um CPF.");
         }
-        
+
         if (CPFValidator.validate(cpf)) {
             errorLabel.setText("Funcionou, enviando pra proxima página");
             // Depois tem que remover esse errorLabel e direcionar para a página de votação
             // new VotePage(cpf).setVisible(true);
             // dispose();
+            System.out.println("antes try");
+            try {
+                System.out.println("dentro try");
+                VoteClient vc = new VoteClient();
+                vc.listenAsync();
+                System.out.println(vc.getVotingInfo());
+            } catch (Exception e) {
+            }
         } else {
             errorLabel.setText("CPF inválido. Tente novamente.");
         }
