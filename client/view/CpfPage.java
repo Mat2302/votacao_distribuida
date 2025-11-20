@@ -1,6 +1,6 @@
 package client.view;
 
-import client.CPFValidator;
+import shared.CPFValidator;
 import java.awt.*;
 import javax.swing.*;
 
