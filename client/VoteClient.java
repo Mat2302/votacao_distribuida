@@ -21,9 +21,9 @@ public class VoteClient {
         return this.votingInfo;
     }
 
-    public VoteClient() throws Exception {
+    public VoteClient(String ip) throws Exception {
         try {
-            this.socket = new Socket("localhost", 1234);
+            this.socket = new Socket(ip, 1234);
             System.out.println("Connected to server!");
 
             System.out.println(this.socket);
@@ -64,6 +64,8 @@ public class VoteClient {
 
             } catch (Exception e) {
                 System.err.println("Communication error: " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("An error occurred while listening for server messages.", e);
             }
         });
 

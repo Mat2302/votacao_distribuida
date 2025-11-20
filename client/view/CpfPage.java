@@ -8,11 +8,12 @@ import client.VoteClient;
 
 public class CpfPage extends JFrame {
     private final JTextField cpfField;
+    private final JTextField ipField;
     private final JLabel errorLabel;
 
     public CpfPage() {
         setTitle("Identificação do Eleitor");
-        setSize(350, 200);
+        setSize(400, 250);
         setLocationRelativeTo(null);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -25,16 +26,30 @@ public class CpfPage extends JFrame {
 
         JPanel centerPanel = new JPanel(new GridLayout(3, 1, 5, 5));
 
+        ipField = new JTextField();
+        centerPanel.add(new JLabel("IP: ", SwingConstants.CENTER));
+        centerPanel.add(ipField);
+
         cpfField = new JTextField();
-        centerPanel.add(new JLabel("CPF: ", SwingConstants.LEFT));
+        centerPanel.add(new JLabel("CPF: ", SwingConstants.CENTER));
         centerPanel.add(cpfField);
 
         errorLabel = new JLabel("", SwingConstants.CENTER);
+        errorLabel.setSize(getPreferredSize());
         errorLabel.setForeground(Color.RED);
         centerPanel.add(errorLabel);
 
         JButton sendButton = new JButton("Prosseguir");
-        sendButton.addActionListener(e -> validateCPF());
+        sendButton.addActionListener(e -> {
+            VoteClient vc = validateIp();
+            
+            if (vc == null){
+                errorLabel.setText("IP inválido. Tente novamente.");
+                return;
+            }
+
+            validateCPF(vc);
+        });
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(sendButton);
@@ -46,26 +61,45 @@ public class CpfPage extends JFrame {
         add(content);
     }
 
-    private void validateCPF() {
+    private void validateCPF(VoteClient voteClient) {
         String cpf = cpfField.getText().trim();
         if (cpf.isEmpty()) {
             errorLabel.setText("Digite um CPF.");
         }
 
         if (CPFValidator.validate(cpf)) {
-            errorLabel.setText("Funcionou, enviando pra proxima página");
-            // Depois tem que remover esse errorLabel e direcionar para a página de votação
-            // new VotePage(cpf).setVisible(true);
-            // dispose();
             try {
-                VoteClient voteCliente = new VoteClient();
-                voteCliente.listenAsync();
-
-                // passar o voteCliente como parâmetro para a tela de visualização.
+                if (voteClient.getVotingInfo() != null) {
+                    new VotePage(cpf, voteClient).setVisible(true);
+                    dispose();
+                } else {
+                    errorLabel.setText("Erro: Não foi possível obter informações de votação.");
+                }
             } catch (Exception e) {
+                errorLabel.setText("Erro ao conectar ao servidor de votação.");
+                System.out.println(e.getMessage());
             }
         } else {
             errorLabel.setText("CPF inválido. Tente novamente.");
         }
     }
+
+    private VoteClient validateIp() {
+        String ip = ipField.getText().trim();
+
+        if (ip.isEmpty()) {
+            return null;
+        }
+
+        VoteClient voteClient;
+        try {
+            voteClient = new VoteClient(ip);
+            voteClient.listenAsync();
+            return voteClient;
+        } catch (Exception e) {
+            errorLabel.setText("Não foi possível conectar ao servidor.");
+            return null;
+        }
+    }
+
 }

@@ -1,12 +1,11 @@
 ===== RELATÓRIO DE OPÇÕES =====
-Título: ferias
-Descrição: decidir para onde iremos nas ferias
-Pergunta: para onde iremos?
+Título: teste
+Descrição: teste
+Pergunta: teste?
 ================================
 
 Votos por opção:
 --------------------------------
-acapulco: 1 voto(s)
-guaruja: 2 voto(s)
-bahia: 0 voto(s)
-inglaterra: 0 voto(s)
+t1: 1 voto(s)
+t2: 0 voto(s)
+t3: 0 voto(s)

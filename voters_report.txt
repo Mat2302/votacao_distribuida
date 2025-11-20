@@ -1,11 +1,9 @@
 ===== RELATÓRIO DE VOTANTES =====
-Título: ferias
-Descrição: decidir para onde iremos nas ferias
-Pergunta: para onde iremos?
+Título: teste
+Descrição: teste
+Pergunta: teste?
 =================================
 
 Lista de CPFs que votaram:
 ----------------------------------
-03012368019
-58208802000
-25347936088
+41419420810
