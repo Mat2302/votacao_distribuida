@@ -1,0 +1,11 @@
+===== RELATÓRIO DE VOTANTES =====
+Título: ferias
+Descrição: decidir para onde iremos nas ferias
+Pergunta: para onde iremos?
+=================================
+
+Lista de CPFs que votaram:
+----------------------------------
+03012368019
+58208802000
+25347936088
