@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.HashMap;
 
-import client.CPFValidator;
+import shared.CPFValidator;
 import shared.NetCommand;
 import shared.NetControl;
 import shared.VoteOption;
