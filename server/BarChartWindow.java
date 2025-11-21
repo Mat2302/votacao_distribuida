@@ -1,6 +1,9 @@
 package server;
 
 import javax.swing.*;
+
+import shared.NetProtocol;
+
 import java.awt.*;
 import java.util.HashMap;
 
@@ -10,6 +13,13 @@ public class BarChartWindow extends JFrame {
 
     public BarChartWindow(int[] values, String[] labels, String title, String description, String question, Runnable onCloseCallback) {
         super("Votação: " + title);
+
+        JLabel ipLabel = new JLabel("IP do servidor: " + NetProtocol.getLocalIpAddress());
+        ipLabel.setFont(new Font("Arial", Font.PLAIN, 16));
+        ipLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        ipLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        add(ipLabel, BorderLayout.NORTH);
+        System.out.println("IP do servidor: " + NetProtocol.getLocalIpAddress() + "\n");
 
         if (values.length != labels.length) {
             throw new IllegalArgumentException("values e labels devem ter o mesmo comprimento");

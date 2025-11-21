@@ -6,4 +6,3 @@ Pergunta: teste?
 
 Lista de CPFs que votaram:
 ----------------------------------
-41419420810

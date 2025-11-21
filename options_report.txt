@@ -6,6 +6,5 @@ Pergunta: teste?
 
 Votos por opção:
 --------------------------------
-t1: 1 voto(s)
-t2: 0 voto(s)
-t3: 0 voto(s)
+sim: 0 voto(s)
+nao: 0 voto(s)
