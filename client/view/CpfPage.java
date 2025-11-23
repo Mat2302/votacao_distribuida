@@ -10,11 +10,13 @@ import client.VoteClient;
 public class CpfPage extends JFrame {
     private final JFormattedTextField cpfField;
     private final JTextField ipField;
+    private final JTextField portField;
     private final JLabel errorLabel;
 
     public CpfPage() {
+
         setTitle("Identificação do Eleitor");
-        setSize(400, 250);
+        setSize(400, 370);
         setLocationRelativeTo(null);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -25,7 +27,8 @@ public class CpfPage extends JFrame {
         JLabel title = new JLabel("Insira seu CPF:", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 18));
 
-        JPanel centerPanel = new JPanel(new GridLayout(5, 1, 5, 5));
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         try {
             MaskFormatter cpfMask = new MaskFormatter("###.###.###-##");
@@ -59,8 +62,12 @@ public class CpfPage extends JFrame {
             throw new RuntimeException("Erro ao criar máscaras.", e);
         }
         
-        centerPanel.add(new JLabel("CPF: ", SwingConstants.CENTER));
-        centerPanel.add(cpfField);
+        JPanel cpfPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        cpfPanel.add(new JLabel("CPF:", SwingConstants.CENTER));
+        cpfPanel.add(cpfField);
+        cpfPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        centerPanel.add(cpfPanel);
 
         ipField = new JFormattedTextField();
         ipField.setText("Ex: 192.168.0.1 ou vazio = localhost");
@@ -80,23 +87,70 @@ public class CpfPage extends JFrame {
                 }
             }
         });
+        JPanel ipPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        ipPanel.add(new JLabel("IP do servidor (ex: 192.168.0.1 ou localhost):", SwingConstants.CENTER));
+        ipPanel.add(ipField);
+        ipPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        centerPanel.add(ipPanel);
 
-        centerPanel.add(new JLabel("Use pontos no IP do servidor (ex: 192.168.0.1 ou localhost): ", SwingConstants.CENTER));
-        centerPanel.add(ipField);
+        portField = new JFormattedTextField();
+        portField.setText("Ex: 8000 ou vazio = 1234");
+        portField.setForeground(Color.GRAY);
+
+        portField.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (portField.getText().equals("Ex: 8000 ou vazio = 1234")) {
+                    portField.setText("");
+                    portField.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (portField.getText().isEmpty()) {
+                    portField.setForeground(Color.GRAY);
+                    portField.setText("Ex: 8000 ou vazio = 1234");
+                }
+            }
+        });
+        JPanel portPanel = new JPanel(new GridLayout(2, 1, 5, 5));
+        portPanel.add(new JLabel("Porta do servidor (vazio = 1234):", SwingConstants.CENTER));
+        portPanel.add(portField);
+        portPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        centerPanel.add(portPanel);
 
         errorLabel = new JLabel("", SwingConstants.CENTER);
         errorLabel.setForeground(Color.RED);
+        errorLabel.setMaximumSize(new Dimension(350, Integer.MAX_VALUE));
+        errorLabel.setPreferredSize(new Dimension(350, errorLabel.getPreferredSize().height));
+        errorLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         centerPanel.add(errorLabel);
 
         JButton sendButton = new JButton("Prosseguir");
         sendButton.addActionListener(e -> {
-            VoteClient vc = validateIp();
+            String ip = ipField.getText().trim();
             
-        if (vc == null){
-            return;
-        }
+            ip = validateIp(ip);
 
-            validateCPF(vc);
+            if (ip == null) {
+                return;
+            }
+
+            String port = portField.getText().trim();
+
+            int portInt  = validatePort(port);
+            if (portInt == -1) {
+                return;
+            }
+
+            VoteClient voteClient = null;
+            try {
+                voteClient = new VoteClient(ip, portInt);
+                voteClient.listenAsync();
+            } catch (Exception ex) {
+                errorLabel.setText("Não foi possível conectar ao servidor.");
+                System.out.println(ex.getMessage());
+            }
+
+            validateCPF(voteClient);
         });
 
         JPanel bottomPanel = new JPanel();
@@ -121,7 +175,8 @@ public class CpfPage extends JFrame {
                     new VotePage(cpf, voteClient).setVisible(true);
                     dispose();
                 } else {
-                    errorLabel.setText("Erro: Não foi possível obter informações de votação. Servidor indisponível.");
+                    errorLabel.setText("Erro: Informações de votação não obtidas. Servidor indisponível!");
+                    errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
                 }
             } catch (Exception e) {
                 errorLabel.setText("Erro ao conectar ao servidor de votação.");
@@ -132,12 +187,11 @@ public class CpfPage extends JFrame {
         }
     }
 
-    private VoteClient validateIp() {
-        String ip = ipField.getText().trim();
-    
+    private String validateIp(String ip) {
         if (ip.isEmpty() || ip.equals("Ex: 192.168.0.1 ou vazio = localhost")) {
                 ip = "localhost";
                 System.out.println("Usando localhost como IP do servidor.");
+                return ip;
         } else {
             // Regex para validar IPv4
             String ipRegex = 
@@ -149,14 +203,23 @@ public class CpfPage extends JFrame {
                 return null;
             }
         }
+        return ip;
+    }
+
+    private int validatePort(String port) {
+        if (port.isEmpty() || port.equals("Ex: 8000 ou vazio = 1234")) {
+            System.out.println("Usando 1234 como porta do servidor.");
+            
+            return 1234;
+        } else {
+            String portRegex = "^([0-9]{1,5})$";
+                    
+            if (!port.matches(portRegex)) {
+                errorLabel.setText("Digite a porta do servidor corretamente (ex: 8000 ou 1234).");
+                return -1;
+            }
+        } 
     
-        try {
-            VoteClient voteClient = new VoteClient(ip);
-            voteClient.listenAsync();
-            return voteClient;
-        } catch (Exception e) {
-            errorLabel.setText("Não foi possível conectar ao servidor.");
-            return null;
-        }
+        return Integer.parseInt(port);
     }
 }

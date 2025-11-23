@@ -21,9 +21,9 @@ public class VoteClient {
         return this.votingInfo;
     }
 
-    public VoteClient(String ip) throws Exception {
+    public VoteClient(String ip, int port) throws Exception {
         try {
-            this.socket = new Socket(ip, 1234);
+            this.socket = new Socket(ip, port);
             System.out.println("Connected to server!");
 
             System.out.println(this.socket);

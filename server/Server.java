@@ -18,6 +18,8 @@ import shared.VotingInfoPayload;
 
 public class Server {
     public static void main(String[] args) {
+        NetProtocol.setPort();
+
         try {
             HashMap<String, Integer> votes = new HashMap<>();
 
@@ -111,7 +113,7 @@ class ServerController {
 
     void start(VotingInfoPayload votingPayload, BarChartWindow chart) {
         try (ServerSocket serverSocket = new ServerSocket(NetProtocol.port)) {
-            System.out.println("Server listening on port " + NetProtocol.port);
+            System.out.println("Servidor ativo na porta " + NetProtocol.port);
 
             while (running) {
                 try {
