@@ -80,6 +80,20 @@ public class ClientHandler implements Runnable {
                     return;
                 }
 
+                if (votes.containsKey(payload.getVoter().getCPF())) {
+
+                    // 1. Avisa o cliente que deu erro
+                    oos.writeObject(new NetControl(NetCommand.AlreadyVoted));
+                    oos.flush();
+
+                    System.out.println("[-] Voto recusado (Duplicado): " + payload.getVoter().getCPF());
+
+                    // 2. Encerra a conexão
+                    oos.writeObject(new NetControl(NetCommand.Shutdown));
+                    oos.flush();
+                    return; // Sai para não salvar nada nem mexer no gráfico
+                }
+
                 votes.put(payload.getVoter().getCPF(), payload.getVoteOptionID());
                 
                 // Atualiza o gráfico a cada nova requisição
@@ -96,6 +110,9 @@ public class ClientHandler implements Runnable {
                       .count();
                 
                 chart.updateValue(label, (int) count);
+
+                oos.writeObject(new NetControl(NetCommand.VoteReceived)); // Avisa sucesso
+                oos.flush();
                 
                 System.out.println("Vote registered for " + payload.getVoter().getCPF() + " closing connection.");
                 oos.writeObject(new NetControl(NetCommand.Shutdown));

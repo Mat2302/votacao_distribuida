@@ -1,10 +1,12 @@
 ===== RELATÓRIO DE OPÇÕES =====
-Título: teste
-Descrição: teste
-Pergunta: teste?
+Título: test
+Descrição: test
+Pergunta: test
 ================================
 
 Votos por opção:
 --------------------------------
-sim: 0 voto(s)
-nao: 0 voto(s)
+a: 2 voto(s)
+b: 0 voto(s)
+c: 1 voto(s)
+d: 0 voto(s)

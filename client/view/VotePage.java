@@ -88,13 +88,10 @@ public class VotePage extends JFrame {
 
         try {
             voteClient.sendVote(voter, Integer.parseInt(selectedOption));
-            JOptionPane.showMessageDialog(this, 
-                "Você votou na opção: " + (Integer.parseInt(selectedOption) + 1));
-            dispose();
+
+            // Opcional: Fechar a janela visualmente para não clicar 2 vezes
+            this.setVisible(false);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, 
-                "Erro ao enviar voto: " + e.getMessage(), 
-                "Erro", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }

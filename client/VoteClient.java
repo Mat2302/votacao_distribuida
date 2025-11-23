@@ -50,6 +50,26 @@ public class VoteClient {
                     if (obj instanceof NetControl nc) {
                         System.out.println("Received: " + nc.getNetCommand());
 
+                        // CASO 1: CPF REPETIDO (ERRO)
+                        if (nc.getNetCommand() == NetCommand.AlreadyVoted) {
+                            javax.swing.SwingUtilities.invokeLater(() -> {
+                                javax.swing.JOptionPane.showMessageDialog(null,
+                                        "ERRO: Você já votou anteriormente!",
+                                        "Voto Duplicado",
+                                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                            });
+                        }
+
+                        // CASO 2: VOTO NOVO (SUCESSO)
+                        else if (nc.getNetCommand() == NetCommand.VoteReceived) {
+                            javax.swing.SwingUtilities.invokeLater(() -> {
+                                javax.swing.JOptionPane.showMessageDialog(null,
+                                        "Voto registrado com sucesso!",
+                                        "Confirmação",
+                                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                            });
+                        }
+
                         if (nc.getNetCommand() == NetCommand.Shutdown) {
                             System.out.println("Servidor pediu shutdown. Encerrando cliente.");
                             break;
